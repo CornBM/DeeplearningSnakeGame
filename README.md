@@ -1,0 +1,2 @@
+# DeeplearningSnakeGame
+用神经网络训练的玩贪吃蛇的AI
