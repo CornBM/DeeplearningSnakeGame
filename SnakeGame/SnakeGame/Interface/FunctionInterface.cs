@@ -10,5 +10,6 @@ namespace SnakeGame.Interface
     {
         void Start();
         void Stop();
+        bool IsRunning();
     }
 }

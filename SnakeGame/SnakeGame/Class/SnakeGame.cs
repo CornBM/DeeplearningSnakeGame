@@ -201,5 +201,10 @@ namespace SnakeGame.Class
                 moveThread.Abort();
             }
         }
+
+        public bool IsRunning()
+        {
+            return isRunning;
+        }
     }
 }

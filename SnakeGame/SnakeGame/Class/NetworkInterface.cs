@@ -16,12 +16,12 @@ namespace SnakeGame.Class
         private Thread receiveThread;
         private bool isReceiving;
 
-        private DataInterface Data;
+        private Action<string> process;
 
-        public NetworkInterface(DataInterface data, int localPort)
+        public NetworkInterface(Action<string> process, int localPort)
         {
             udpClient = new UdpClient(localPort);
-            this.Data = data;
+            this.process = process;
         }
 
         public void Start()
@@ -59,6 +59,7 @@ namespace SnakeGame.Class
         {
             // 处理接收到的消息
             // 这里可以添加你的业务逻辑
+            process(message);
         }
 
         public void Stop()
@@ -69,6 +70,11 @@ namespace SnakeGame.Class
                 receiveThread.Abort();
             }
             udpClient.Close();
+        }
+
+        public bool IsRunning()
+        {
+            return isReceiving;
         }
     }
 }

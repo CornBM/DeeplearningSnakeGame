@@ -7,12 +7,13 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SnakeGame.Gui
 {
-    public partial class ShowWindow : Form
+    public partial class ShowWindow : Form, FunctionInterface
     {
         private DataInterface Data;
         private Graphics GI;
@@ -20,10 +21,15 @@ namespace SnakeGame.Gui
         private int length;
 
         private Bitmap i;
-        public ShowWindow(DataInterface data, int length)
+
+        private Thread showThread;
+        private bool isRunning = false;
+        private int interval;
+        public ShowWindow(DataInterface data, int interval, int length)
         {
             InitializeComponent();
             Data = data;
+            this.interval = interval;
             this.length = length;
         }
 
@@ -58,7 +64,7 @@ namespace SnakeGame.Gui
             }
         }
 
-        public void ShowMap()
+        public void Show()
         {
             UpdateImage();
             G.DrawImage(i, 20, 20);
@@ -75,7 +81,11 @@ namespace SnakeGame.Gui
 
         private void ShowWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
-            Program.f.gs.Stop();
+            isRunning = false;
+            if (showThread != null && showThread.IsAlive)
+            {
+                showThread.Join();
+            }
         }
 
         private void ShowWindow_KeyPress(object sender, KeyPressEventArgs e)
@@ -113,6 +123,30 @@ namespace SnakeGame.Gui
                     // 如果按下的键不是w, s, a, d，则不执行任何操作
                     break;
             }
+        }
+
+        public void Start()
+        {
+            isRunning = true;
+            this.Visible = true;
+            showThread = new Thread(() => {
+                while (isRunning)
+                {
+                    Show();
+                    Thread.Sleep(interval);
+                }
+            });
+            showThread.Start();
+        }
+
+        public void Stop()
+        {
+            this.Close();
+        }
+
+        public bool IsRunning()
+        {
+            return isRunning;
         }
     }
 }
