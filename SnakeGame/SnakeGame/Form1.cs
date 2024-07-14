@@ -22,9 +22,8 @@ namespace SnakeGame
         public Form1()
         {
             InitializeComponent();
-            M = new GameSystemManager(4, 1145);
+            M = new GameSystemManager(2, 1145);
         }
-
         private void button1_Click(object sender, EventArgs e)
         {
             M.StartNewGame();

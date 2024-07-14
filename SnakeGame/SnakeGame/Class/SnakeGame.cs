@@ -69,13 +69,13 @@ namespace SnakeGame.Class
             Snake = snake;
             Data = data;
             this.interval = interval;
+            Makefood();
         }
 
         public void Start()
         {
             isRunning = true;
             moveThread = new Thread(()=>{
-                Makefood();
                 while (isRunning)
                 {
                     Move();

@@ -10,13 +10,14 @@ using SnakeGame.Interface;
 
 namespace SnakeGame.Class
 {
-    internal class NetworkInterface : FunctionInterface
+    public class NetworkInterface : FunctionInterface
     {
         private UdpClient udpClient;
         private Thread receiveThread;
         private bool isReceiving;
 
         private Action<string> process;
+        private IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
         public NetworkInterface(Action<string> process, int localPort)
         {
@@ -47,15 +48,24 @@ namespace SnakeGame.Class
         private void Receive()
         {
             // 接收数据
-            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
             byte[] receivedBytes = udpClient.Receive(ref remoteEndPoint);
             string message = Encoding.ASCII.GetString(receivedBytes);
 
             Console.WriteLine($"Received from {remoteEndPoint}: {message}");
-            ProcessMessage(message, remoteEndPoint);
+            ProcessMessage(message);
         }
 
-        private void ProcessMessage(string message, IPEndPoint remoteEndPoint)
+        public void Send(string message)
+        {
+            // 将字符串消息编码为字节数组
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+
+            // 使用UdpClient发送字节数组到指定的远程端点
+            udpClient.Send(messageBytes, messageBytes.Length, remoteEndPoint);
+        }
+    
+
+        private void ProcessMessage(string message)
         {
             // 处理接收到的消息
             // 这里可以添加你的业务逻辑

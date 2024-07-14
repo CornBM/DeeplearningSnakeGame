@@ -7,44 +7,51 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SnakeGame.Class
 {
     internal class GameSystem : FunctionInterface
     {
         public int Id;
+        private string configPath;
 
         private InIFile ini;
         private bool isRunning = false;
         private List<FunctionInterface> funcs;
 
-        public DataInterface Data;
+        public Data Data;
         public GameSystem(string configPath, int id)
         {
             Id = id;
+            this.configPath = configPath;
+            Init();
+        }
 
+        public void Init()
+        {
             ini = new InIFile(configPath);
             Random r = new Random();
             funcs = new List<FunctionInterface>();
 
-            DataInterface data = new Data(
+            Data = new Data(
                 new Map(
                     int.Parse(ini.Read("width", "Map")),
                     int.Parse(ini.Read("height", "Map"))
                     ),
                 (Direction)r.Next(0, 4));
 
-            Console.WriteLine($"{data.MapWidth()}, {data.MapHeight()}");
             try
             {
-                funcs.Add(new ShowWindow(
-                    data,
+                funcs.Add(new ShowWindowThread(
+                    new ShowWindow(
+                    Data,
                     int.Parse(ini.Read("interval", "Show")),
-                    int.Parse(ini.Read("length", "Show"))));
+                    int.Parse(ini.Read("length", "Show")))));
 
                 funcs.Add(new SnakeGameI(
-                    data,
-                    new Snake(data, int.Parse(ini.Read("length", "Snake"))),
+                    Data,
+                    new Snake(Data, int.Parse(ini.Read("length", "Snake"))),
                     int.Parse(ini.Read("interval", "SnakeGame"))
                     ));
             }
@@ -53,10 +60,11 @@ namespace SnakeGame.Class
                 Console.WriteLine(e.StackTrace);
             }
         }
+
         public void Start()
         {
             isRunning = true;
-            foreach(FunctionInterface func in funcs)
+            foreach (FunctionInterface func in funcs)
             {
                 func.Start();
             }
@@ -74,10 +82,12 @@ namespace SnakeGame.Class
                             break;
                         }
                     }
+                    Thread.Sleep(100);
                 }
                 Stop();
             });
             suicide.Start();
+
         }
 
         public void Stop()
@@ -88,7 +98,6 @@ namespace SnakeGame.Class
                 if(func.IsRunning())
                     func.Stop();
             }
-            Program.f.M.StopGame(Id);
         }
 
         public bool IsRunning()

@@ -53,6 +53,7 @@
     <Compile Include="Class\GameSystem.cs" />
     <Compile Include="Class\GameSystemManager.cs" />
     <Compile Include="Class\NetworkInterface.cs" />
+    <Compile Include="Class\ShowWindowThread.cs" />
     <Compile Include="Class\SnakeGame.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

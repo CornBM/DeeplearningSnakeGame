@@ -13,7 +13,7 @@ using System.Windows.Forms;
 
 namespace SnakeGame.Gui
 {
-    public partial class ShowWindow : Form, FunctionInterface
+    public partial class ShowWindow : Form
     {
         private DataInterface Data;
         private Graphics GI;
@@ -64,7 +64,7 @@ namespace SnakeGame.Gui
             }
         }
 
-        public void Show()
+        public void Showwindow()
         {
             UpdateImage();
             G.DrawImage(i, 20, 20);
@@ -72,11 +72,12 @@ namespace SnakeGame.Gui
 
         private void ShowWindow_Load(object sender, EventArgs e)
         {
-            i = new Bitmap(Data.MapWidth() * length, Data.MapHeight() * length+30);
+            i = new Bitmap(Data.MapWidth() * length, Data.MapHeight() * length + 30);
             this.Size = new Size(Data.MapWidth() * length + 60, Data.MapHeight() * length + 80);
             this.Refresh();
             GI = Graphics.FromImage(i);
             G = this.CreateGraphics();
+            Start();
         }
 
         private void ShowWindow_FormClosed(object sender, FormClosedEventArgs e)
@@ -128,25 +129,14 @@ namespace SnakeGame.Gui
         public void Start()
         {
             isRunning = true;
-            this.Visible = true;
             showThread = new Thread(() => {
                 while (isRunning)
                 {
-                    Show();
+                    Showwindow();
                     Thread.Sleep(interval);
                 }
             });
             showThread.Start();
-        }
-
-        public void Stop()
-        {
-            this.Close();
-        }
-
-        public bool IsRunning()
-        {
-            return isRunning;
         }
     }
 }
