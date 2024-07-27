@@ -1,10 +1,8 @@
-﻿using SnakeGame.Gui;
-using SnakeGame.Interface;
+﻿using SnakeGame.Interface;
 using System;
 using System.Collections;
+using System.Drawing;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace SnakeGame.Class
@@ -15,6 +13,7 @@ namespace SnakeGame.Class
         public bool[] idAvailability;
 
         public NetworkInterface network;
+        private int port;
 
         public GameSystemManager(int maxNum, int port)
         {
@@ -56,30 +55,29 @@ namespace SnakeGame.Class
         {
             if (!games.ContainsKey(id))
                 return;
-            GameSystem game = (GameSystem)games[id];
-            game.Stop();
             games.Remove(id);
             idAvailability[id] = true;
         }
 
         public void ProcessMessage(string message)
         {
-            Console.WriteLine(message);
             string[] data = message.Split(' ');
             int id = -1;
+            GameSystem game = null;
             try
             {
                 id = int.Parse(data[0]);
-                if(games.ContainsKey(id))
+                if (!idAvailability[id])
                 {
                     Direction d = (Direction)int.Parse(data[1]);
-                    GameSystem game = (GameSystem)games[id];
+                    game = (GameSystem)games[id];
                     game.Data.SetDirection(d);
-                    network.Send(id + " " + game.Data.SerializeMap());
+                    network.Send($"{id} {game.Data.Score()} {game.Data.SerializeMap()}");
                 }
                 else
                 {
-                    network.Send(id + " over");
+                    Console.WriteLine($"id:{id}");
+                    network.Send($"{id} 0 over");
                 }
             }
             catch
@@ -88,14 +86,18 @@ namespace SnakeGame.Class
                 {
                     case '+':
                         id = StartNewGame();
-                        GameSystem game = (GameSystem)games[id];
+                        game = (GameSystem)games[id];
      
-                        network.Send(id + " " + game.Data.SerializeMap());
+                        network.Send($"{id} {game.Data.Score()} {game.Data.SerializeMap()}");
                         break;
                     case '-':
                         id = int.Parse(data[1]);
-                        StopGame(id);
-                        network.Send(id + " over");
+                        if (games.ContainsKey(id))
+                        {
+                            game = (GameSystem)games[id];
+                            game.Stop();
+                            network.Send(id + " over");
+                        }
                         break;
 
                 }

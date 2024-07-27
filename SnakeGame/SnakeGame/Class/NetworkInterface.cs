@@ -1,40 +1,42 @@
-﻿using System;
+﻿using SnakeGame.Interface;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using SnakeGame.Interface;
 
 namespace SnakeGame.Class
 {
     public class NetworkInterface : FunctionInterface
     {
-        private UdpClient udpClient;
-        private Thread receiveThread;
+        private TcpListener tcpListener;
+        private TcpClient tcpClient;
+        private Thread acceptThread;
         private bool isReceiving;
 
         private Action<string> process;
-        private IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
         public NetworkInterface(Action<string> process, int localPort)
         {
-            udpClient = new UdpClient(localPort);
+            tcpListener = new TcpListener(IPAddress.Parse("127.0.0.1"), localPort);
             this.process = process;
         }
 
         public void Start()
         {
             isReceiving = true;
-            receiveThread = new Thread(() =>
+            tcpListener.Start();
+            acceptThread = new Thread(() =>
             {
                 try
                 {
                     while (isReceiving)
                     {
-                        Receive();
+                        Accept();
                     }
                 }
                 catch (Exception e)
@@ -42,28 +44,64 @@ namespace SnakeGame.Class
                     Console.WriteLine("Error receiving data: " + e.Message);
                 }
             });
+            acceptThread.Start();
+        }
+
+        private void Accept()
+        {
+            // 接受客户端连接
+            tcpClient = tcpListener.AcceptTcpClient();
+            Thread receiveThread = new Thread(() =>
+            {
+                HandleClient(tcpClient.GetStream());
+            });
             receiveThread.Start();
         }
 
-        private void Receive()
+        private void HandleClient(NetworkStream stream)
         {
             // 接收数据
-            byte[] receivedBytes = udpClient.Receive(ref remoteEndPoint);
-            string message = Encoding.ASCII.GetString(receivedBytes);
-
-            Console.WriteLine($"Received from {remoteEndPoint}: {message}");
-            ProcessMessage(message);
+            byte[] buffer = new byte[1024];
+            while (isReceiving)
+            {
+                try
+                {
+                    int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                    if (bytesRead > 0)
+                    {
+                        string message = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+                        Console.WriteLine($"Received: {message}");
+                        ProcessMessage(message);
+                    }
+                }
+                catch
+                {
+                    break;
+                }
+            }
+            // 清理资源
+            if (stream != null)
+            {
+                stream.Close();
+            }
+            if (tcpClient != null)
+            {
+                tcpClient.Close();
+            }
         }
 
         public void Send(string message)
         {
-            // 将字符串消息编码为字节数组
-            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            if (tcpClient != null && tcpClient.Connected)
+            {
+                // 将字符串消息编码为字节数组
+                byte[] messageBytes = Encoding.ASCII.GetBytes(message);
 
-            // 使用UdpClient发送字节数组到指定的远程端点
-            udpClient.Send(messageBytes, messageBytes.Length, remoteEndPoint);
+                // 使用TcpClient发送字节数组
+                NetworkStream stream = tcpClient.GetStream();
+                stream.Write(messageBytes, 0, messageBytes.Length);
+            }
         }
-    
 
         private void ProcessMessage(string message)
         {
@@ -75,11 +113,15 @@ namespace SnakeGame.Class
         public void Stop()
         {
             isReceiving = false;
-            if (receiveThread != null && receiveThread.IsAlive)
+            if (acceptThread != null && acceptThread.IsAlive)
             {
-                receiveThread.Abort();
+                acceptThread.Interrupt();
             }
-            udpClient.Close();
+            if (tcpClient != null && tcpClient.Connected)
+            {
+                tcpClient.Close();
+            }
+            tcpListener.Stop();
         }
 
         public bool IsRunning()

@@ -3,11 +3,7 @@ using SnakeGame.Interface;
 using SnakeGame.Tool;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace SnakeGame.Class
 {
@@ -39,7 +35,7 @@ namespace SnakeGame.Class
                     int.Parse(ini.Read("width", "Map")),
                     int.Parse(ini.Read("height", "Map"))
                     ),
-                (Direction)r.Next(0, 4));
+                (Direction)r.Next(0, 4), Id);
 
             try
             {
@@ -82,7 +78,6 @@ namespace SnakeGame.Class
                             break;
                         }
                     }
-                    Thread.Sleep(100);
                 }
                 Stop();
             });
@@ -98,6 +93,7 @@ namespace SnakeGame.Class
                 if(func.IsRunning())
                     func.Stop();
             }
+            Program.f.M.StopGame(Id);
         }
 
         public bool IsRunning()

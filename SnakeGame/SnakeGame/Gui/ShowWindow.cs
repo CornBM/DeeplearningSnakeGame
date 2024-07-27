@@ -1,14 +1,7 @@
-﻿using SnakeGame.Class;
-using SnakeGame.Interface;
+﻿using SnakeGame.Interface;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SnakeGame.Gui
@@ -67,13 +60,16 @@ namespace SnakeGame.Gui
         public void Showwindow()
         {
             UpdateImage();
-            G.DrawImage(i, 20, 20);
+            G.FillRectangle(new SolidBrush(Color.FromArgb(240, 240, 240)), 20,20,300,30);
+            G.DrawString($"Score: {Data.Score()}", new Font("黑体", 15), new SolidBrush(Color.Red), 20, 20);
+            G.DrawImage(i, 20, 60);
         }
 
         private void ShowWindow_Load(object sender, EventArgs e)
         {
             i = new Bitmap(Data.MapWidth() * length, Data.MapHeight() * length + 30);
-            this.Size = new Size(Data.MapWidth() * length + 60, Data.MapHeight() * length + 80);
+            this.Size = new Size(Data.MapWidth() * length + 60, Data.MapHeight() * length + 120);
+            this.Location = new Point(120 + Data.Id() * (this.Width + 60), 120);
             this.Refresh();
             GI = Graphics.FromImage(i);
             G = this.CreateGraphics();
@@ -92,33 +88,20 @@ namespace SnakeGame.Gui
         private void ShowWindow_KeyPress(object sender, KeyPressEventArgs e)
         {
             char key = Char.ToLower(e.KeyChar);
-            Direction d = Data.LastDirection();
-
             switch (key)
             {
                 case 'w':
-                    if (d != Direction.down)
-                    {
-                        Data.SetDirection(Direction.up);
-                    }
+                    Data.SetDirection(Direction.up);
                     break;
                 case 's':
-                    if (d != Direction.up)
-                    {
-                        Data.SetDirection(Direction.down);
-                    }
+                    Data.SetDirection(Direction.down);
+                    
                     break;
                 case 'a':
-                    if (d != Direction.right)
-                    {
-                        Data.SetDirection(Direction.left);
-                    }
+                    Data.SetDirection(Direction.left);
                     break;
                 case 'd':
-                    if (d != Direction.left)
-                    {
-                        Data.SetDirection(Direction.right);
-                    }
+                    Data.SetDirection(Direction.right);
                     break;
                 default:
                     // 如果按下的键不是w, s, a, d，则不执行任何操作

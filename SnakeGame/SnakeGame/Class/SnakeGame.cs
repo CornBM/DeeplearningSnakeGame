@@ -1,14 +1,7 @@
 ﻿using SnakeGame.Interface;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Net.Sockets;
-using System.Net;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace SnakeGame.Class
 {
@@ -63,12 +56,14 @@ namespace SnakeGame.Class
         private int interval;
 
         private DataInterface Data;
+        private float Score;
 
         public SnakeGameI(DataInterface data, Snake snake, int interval)
         {
             Snake = snake;
             Data = data;
             this.interval = interval;
+            Score = 0;
             Makefood();
         }
 
@@ -133,6 +128,7 @@ namespace SnakeGame.Class
             if (isAte)
             {
                 //makefood
+                Score += 2*Math.Max(Data.MapWidth(),Data.MapHeight());
                 Makefood();
             }
             else
@@ -160,7 +156,19 @@ namespace SnakeGame.Class
                 if (foodCount == 0)
                     Makefood();
             }
+            Score -= 1;
+            if (Score < -2 * Math.Max(Data.MapWidth(), Data.MapHeight()))
+            {
+                Stop();
+                return;
+            }
 
+            Data.SetScore(Score - GetDistance(Snake.Head, Snake.Tail));
+        }
+
+        private float GetDistance(Point a, Point b)
+        {
+            return (float)Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
         }
 
         public void Makefood()

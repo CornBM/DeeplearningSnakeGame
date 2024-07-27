@@ -10,18 +10,27 @@ namespace SnakeGame.Class
 {
     internal class Data : DataInterface
     {
+        private int id;
         private Map map;
         private Direction direction;
         private Direction lastDirection;
         private Semaphore mapLock;
         private Semaphore directionLock;
+        private float score;
 
-        public Data(Map map, Direction direction)
+        public Data(Map map, Direction direction, int id)
         {
             this.map = map;
             this.direction = direction;
             mapLock = new Semaphore(1, 1);
             directionLock = new Semaphore(1, 1);
+            score = 0;
+            this.id = id;
+        }
+
+        public int Id()
+        {
+            return id;
         }
 
         public Direction Direction()
@@ -59,7 +68,25 @@ namespace SnakeGame.Class
         public void SetDirection(Direction direction)
         {
             directionLock.WaitOne();
-            this.direction = direction;
+            switch (direction)
+            {
+                case Interface.Direction.up:
+                    if (lastDirection != Interface.Direction.down)
+                        this.direction = direction;
+                    break;
+                case Interface.Direction.down:
+                    if (lastDirection != Interface.Direction.up)
+                        this.direction = direction;
+                    break;
+                case Interface.Direction.left:
+                    if (lastDirection != Interface.Direction.right)
+                        this.direction = direction;
+                    break;
+                case Interface.Direction.right:
+                    if (lastDirection != Interface.Direction.left)
+                        this.direction = direction;
+                    break;
+            }
             directionLock.Release();
         }
 
@@ -106,6 +133,16 @@ namespace SnakeGame.Class
             mapLock.WaitOne();
             map.Data[y, x] = data;
             mapLock.Release();
+        }
+
+        public float Score()
+        {
+            return score;
+        }
+
+        public void SetScore(float score)
+        {
+            this.score = score;
         }
     }
 }
