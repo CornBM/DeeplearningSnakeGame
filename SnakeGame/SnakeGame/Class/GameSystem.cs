@@ -3,20 +3,23 @@ using SnakeGame.Interface;
 using SnakeGame.Tool;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SnakeGame.Class
 {
     internal class GameSystem : FunctionInterface
     {
-        public int Id;
+        public int Id;  // 当前游戏系统被分配的ID
         private string configPath;
 
         private InIFile ini;
         private bool isRunning = false;
-        private List<FunctionInterface> funcs;
+        private Task _system;
+        private List<FunctionInterface> funcs;  // 一个游戏系统包含的功能模块
 
-        public Data Data;
+        public Data Data; // 游戏系统的数据接口
         public GameSystem(string configPath, int id)
         {
             Id = id;
@@ -26,10 +29,13 @@ namespace SnakeGame.Class
 
         public void Init()
         {
+            // 初始化配置文件
             ini = new InIFile(configPath);
             Random r = new Random();
+            // 初始化功能模块
             funcs = new List<FunctionInterface>();
 
+            // 初始化数据接口
             Data = new Data(
                 new Map(
                     int.Parse(ini.Read("width", "Map")),
@@ -39,12 +45,16 @@ namespace SnakeGame.Class
 
             try
             {
-                funcs.Add(new ShowWindowThread(
-                    new ShowWindow(
+                // 添加一个显示窗口模块
+                ShowWindow s = new ShowWindow(
                     Data,
                     int.Parse(ini.Read("interval", "Show")),
-                    int.Parse(ini.Read("length", "Show")))));
+                    int.Parse(ini.Read("length", "Show"))
+                );
+                s.Text = $"Snake Game System {Id}";
+                funcs.Add(new ShowWindowThread(s));
 
+                // 添加游戏主线程
                 funcs.Add(new SnakeGameI(
                     Data,
                     new Snake(Data, int.Parse(ini.Read("length", "Snake"))),
@@ -57,43 +67,37 @@ namespace SnakeGame.Class
             }
         }
 
-        public void Start()
+        public async Task Start()
         {
             isRunning = true;
-            foreach (FunctionInterface func in funcs)
+            var tasks = new List<Task>();
+
+            foreach (var func in funcs)
             {
-                func.Start();
+                tasks.Add(Task.Run(async () => {
+                    try
+                    {
+                        await func.Start();
+                    }
+                    finally
+                    {
+                        isRunning = !tasks.Exists(t => t.IsCompleted);
+                    }
+                }));
             }
 
-            Thread suicide = new Thread(() =>
-            {
-                bool ready2die = false;
-                while (!ready2die)
-                {
-                    foreach (FunctionInterface func in funcs)
-                    {
-                        if (!func.IsRunning())
-                        {
-                            ready2die = true;
-                            break;
-                        }
-                    }
-                }
-                Stop();
-            });
-            suicide.Start();
-
+            await Task.WhenAny(tasks);
+            Stop();
         }
 
         public void Stop()
         {
-            isRunning = false;
             foreach (FunctionInterface func in funcs)
             {
-                if(func.IsRunning())
+                if (func.IsRunning())
                     func.Stop();
             }
-            Program.f.M.StopGame(Id);
+            isRunning = false;
         }
 
         public bool IsRunning()

@@ -8,7 +8,7 @@ namespace SnakeGame.Interface
 {
     public interface FunctionInterface
     {
-        void Start();
+        Task Start();
         void Stop();
         bool IsRunning();
     }

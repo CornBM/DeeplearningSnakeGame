@@ -1,5 +1,6 @@
 ﻿using SnakeGame.Class;
 using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace SnakeGame
@@ -10,7 +11,7 @@ namespace SnakeGame
         public Form1()
         {
             InitializeComponent();
-            M = new GameSystemManager(4, 5555);
+            M = new GameSystemManager(4, 5555, "./data/config.ini");
         }
         private void button1_Click(object sender, EventArgs e)
         {
@@ -19,7 +20,7 @@ namespace SnakeGame
 
         private void button2_Click(object sender, EventArgs e)
         {
-
+            Process.Start("E:\\收藏\\小项目\\snake\\DeeplearningSnakeGame\\SnakeGame\\SnakeGame\\bin\\Debug\\data\\config.ini");
         }
 
         

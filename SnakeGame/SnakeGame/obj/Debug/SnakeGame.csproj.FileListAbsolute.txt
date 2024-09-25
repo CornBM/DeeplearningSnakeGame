@@ -9,3 +9,14 @@ C:\Users\18499\Desktop\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug
 C:\Users\18499\Desktop\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug\SnakeGame.pdb
 C:\Users\18499\Desktop\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug\SnakeGame.Form1.resources
 C:\Users\18499\Desktop\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug\SnakeGame.Gui.ShowWindow.resources
+E:\收藏\小项目\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\bin\Debug\SnakeGame.exe.config
+E:\收藏\小项目\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\bin\Debug\SnakeGame.exe
+E:\收藏\小项目\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\bin\Debug\SnakeGame.pdb
+E:\收藏\小项目\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug\SnakeGame.csproj.AssemblyReference.cache
+E:\收藏\小项目\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug\SnakeGame.Form1.resources
+E:\收藏\小项目\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug\SnakeGame.Gui.ShowWindow.resources
+E:\收藏\小项目\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug\SnakeGame.Properties.Resources.resources
+E:\收藏\小项目\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug\SnakeGame.csproj.GenerateResource.cache
+E:\收藏\小项目\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug\SnakeGame.csproj.CoreCompileInputs.cache
+E:\收藏\小项目\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug\SnakeGame.exe
+E:\收藏\小项目\snake\DeeplearningSnakeGame\SnakeGame\SnakeGame\obj\Debug\SnakeGame.pdb

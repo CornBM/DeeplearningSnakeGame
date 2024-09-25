@@ -6,13 +6,14 @@ def response2data(response):
     message = response.split(' ')
     id = int(message[0])
     score = float(message[1])
+    direction = int(message[2])
     # message[2] 格式为 1,1,1\n1,1,1\n1,1,1
-    if 'over' in message[2]:
+    if 'over' in message[3]:
         id = -1
-        return Data(id, score, None)
+        return Data(id, score, direction, None)
     else:
-        mapData = np.vstack([np.fromstring(line, sep=',') for line in message[2].split('\n')])
-    data = Data(id, score, mapData)
+        mapData = np.vstack([np.fromstring(line, sep=',') for line in message[3].split('\n')])
+    data = Data(id, score, direction, mapData)
     return data
 
 def showQueue(queue):
@@ -21,9 +22,10 @@ def showQueue(queue):
         print(data.id, data.score)
 
 class Data:
-    def __init__(self, id, score, mapData):
+    def __init__(self, id, score, direction, mapData):
         self.id = id
         self.score = score
+        self.direction = direction
         self.mapData = mapData
 
 class Dataloader:
@@ -49,9 +51,9 @@ class Dataloader:
         
         data = self.queue.get()
         if data:
-            return data.id, data.score, data.mapData
+            return data.id, data.score, data.direction, data.mapData
         else:
-            return None, None, None
+            return None, None, None, None
 
     def stop(self, id):
         self.TCP_interface.sAr(f"- {id}")

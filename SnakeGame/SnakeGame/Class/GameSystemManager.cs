@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SnakeGame.Class
@@ -14,13 +15,15 @@ namespace SnakeGame.Class
 
         public NetworkInterface network;
         private int port;
+        private string _configPath;
 
-        public GameSystemManager(int maxNum, int port)
+        public GameSystemManager(int maxNum, int port, string configPath)
         {
+            _configPath = configPath;
             games = new Hashtable();
             idAvailability = Enumerable.Repeat(true, maxNum).ToArray();
             network = new NetworkInterface(ProcessMessage, port);
-            network.Start();
+            _ = network.Start();
         }
 
         private int GetId()
@@ -44,19 +47,16 @@ namespace SnakeGame.Class
                 MessageBox.Show("Not enough numbers of id!", "Warning!", MessageBoxButtons.OK);
                 return -1;
             }
-            FunctionInterface game = new GameSystem("./data/config.ini", id);
+            FunctionInterface game = new GameSystem(_configPath, id);
             games.Add(id, game);
-            idAvailability[id] = false;
-            game.Start();
-            return id;
-        }
+            Task.Run(async () => {
+                idAvailability[id] = false;
+                await game.Start();
+                games.Remove(id);
+                idAvailability[id] = true;
+            });
 
-        public void StopGame(int id)
-        {
-            if (!games.ContainsKey(id))
-                return;
-            games.Remove(id);
-            idAvailability[id] = true;
+            return id;
         }
 
         public void ProcessMessage(string message)
@@ -72,12 +72,12 @@ namespace SnakeGame.Class
                     Direction d = (Direction)int.Parse(data[1]);
                     game = (GameSystem)games[id];
                     game.Data.SetDirection(d);
-                    network.Send($"{id} {game.Data.Score()} {game.Data.SerializeMap()}");
+                    network.Send($"{id} {game.Data.Score()} {(int)game.Data.Direction()} {game.Data.SerializeMap()}");
                 }
                 else
                 {
                     Console.WriteLine($"id:{id}");
-                    network.Send($"{id} 0 over");
+                    network.Send($"{id} 0 0 over");
                 }
             }
             catch
@@ -88,7 +88,7 @@ namespace SnakeGame.Class
                         id = StartNewGame();
                         game = (GameSystem)games[id];
      
-                        network.Send($"{id} {game.Data.Score()} {game.Data.SerializeMap()}");
+                        network.Send($"{id} {game.Data.Score()} {(int)game.Data.Direction()} {game.Data.SerializeMap()}");
                         break;
                     case '-':
                         id = int.Parse(data[1]);

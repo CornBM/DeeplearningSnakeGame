@@ -12,31 +12,36 @@ from bfs import bfs
 import torch.nn as nn
 
 def score2loss(score):
-    return 1 * (1.1 ** -score) + 100
+    return 1 * (1.1 ** -score)
 
 def train():
+    net.train()
     dataloader.startNewGame()
     data = dataloader.queue.get()
     id = data.id
+    direction = data.direction
     mapData = data.mapData
     while flag:
-        optimizer.zero_grad()
+        bfsDirection = bfs(mapData)
+        # 接收数据
+        id, Score, direction, mapData = dataloader.move(id, direction)
+        if direction == bfsDirection:
+            time.sleep(0.1)
+            continue
 
+        optimizer.zero_grad()
         intput = torch.from_numpy(mapData).unsqueeze(0).unsqueeze(0).float().to(device)
         output = net(intput)
         direction = torch.argmax(output, dim=1).cpu().numpy()[0]
-        bfsDirection = bfs(mapData)
-        # 接收数据
-        id, Score, mapData = dataloader.move(id, direction)
         # loss = score2loss(Score) + 10* output[0][direction]
-        loss = nn.CrossEntropyLoss()(output, torch.tensor([bfsDirection]).to(device)) * 10
+        loss = nn.CrossEntropyLoss()(output, torch.tensor([bfsDirection]).to(device)) * 10 + score2loss(Score) * 0.1
         print(f"loss: {loss:.4f}")
         loss.backward()
         optimizer.step()
         time.sleep(0.1)
 
     print("Finished Training")
-    torch.save(net.state_dict(), "snake2.pth")
+    torch.save(net.state_dict(), "snake7.pth")
 
 def bfsRun():
     dataloader.startNewGame()
@@ -46,7 +51,7 @@ def bfsRun():
     while flag:
         direction = bfs(mapData)
         # 接收数据
-        id, Score, mapData = dataloader.move(id, direction)
+        id, Score, _,mapData = dataloader.move(id, direction)
 
     print("Finished Training")
 
@@ -62,11 +67,11 @@ if __name__ == "__main__":
     net = SnakeNet(4)
 
     # 加载参数
-    net.load_state_dict(torch.load("snake1.pth"))
+    net.load_state_dict(torch.load("snake6.pth"))
 
     net.to(device)
     dataloader = Dataloader('127.0.0.1', 5555)
-    optimizer = optim.Adam(net.parameters(), lr=0.1)
+    optimizer = optim.Adam(net.parameters(), lr=0.01)
 
     flag = False
     while True:

@@ -15,7 +15,7 @@ namespace SnakeGame.Class
     {
         private TcpListener tcpListener;
         private TcpClient tcpClient;
-        private Thread acceptThread;
+        private Task acceptThread;
         private bool isReceiving;
 
         private Action<string> process;
@@ -26,11 +26,11 @@ namespace SnakeGame.Class
             this.process = process;
         }
 
-        public void Start()
+        public async Task Start()
         {
             isReceiving = true;
             tcpListener.Start();
-            acceptThread = new Thread(() =>
+            acceptThread = Task.Run(() =>
             {
                 try
                 {
@@ -44,7 +44,7 @@ namespace SnakeGame.Class
                     Console.WriteLine("Error receiving data: " + e.Message);
                 }
             });
-            acceptThread.Start();
+            await acceptThread;
         }
 
         private void Accept()
@@ -113,14 +113,6 @@ namespace SnakeGame.Class
         public void Stop()
         {
             isReceiving = false;
-            if (acceptThread != null && acceptThread.IsAlive)
-            {
-                acceptThread.Interrupt();
-            }
-            if (tcpClient != null && tcpClient.Connected)
-            {
-                tcpClient.Close();
-            }
             tcpListener.Stop();
         }
 

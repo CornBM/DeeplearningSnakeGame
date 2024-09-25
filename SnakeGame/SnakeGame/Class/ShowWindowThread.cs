@@ -2,6 +2,7 @@
 using SnakeGame.Interface;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SnakeGame.Class
@@ -9,7 +10,7 @@ namespace SnakeGame.Class
     public class ShowWindowThread : FunctionInterface
     {
         private bool isRunning = false;
-        private Thread window;
+        private Task window;
         private ShowWindow S;
 
         public ShowWindowThread(ShowWindow s)
@@ -21,21 +22,20 @@ namespace SnakeGame.Class
             return isRunning;
         }
 
-        public void Start()
+        public async Task Start()
         {
             isRunning = true;
-            window = new Thread(() =>
+            window = Task.Run(() =>
             {
                 Application.Run(S);
-                isRunning = false;
             });
-            window.Start();
+            await window;
+            isRunning = false;
         }
 
         public void Stop()
         {
-            isRunning = false;
-            window.Abort();
+            S.Close();
         }
     }
 }
