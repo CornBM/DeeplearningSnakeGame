@@ -10,10 +10,10 @@ namespace SnakeGame.Class
 {
     public class GameSystemManager
     {
-        public Hashtable games;
-        public bool[] idAvailability;
+        public Hashtable games; // id -> game  <int, GameSystem>
+        public bool[] idAvailability; // 限制同时进行游戏的数量
 
-        public NetworkInterface network;
+        public NetworkInterface network; // 提供网络接口让ai玩游戏
         private int port;
         private string _configPath;
 
@@ -26,6 +26,7 @@ namespace SnakeGame.Class
             _ = network.Start();
         }
 
+        // 获取可用id
         private int GetId()
         {
             int l = idAvailability.Length;
@@ -47,11 +48,14 @@ namespace SnakeGame.Class
                 MessageBox.Show("Not enough numbers of id!", "Warning!", MessageBoxButtons.OK);
                 return -1;
             }
-            FunctionInterface game = new GameSystem(_configPath, id);
-            games.Add(id, game);
+            // 如果有可用id，则创建一个游戏
+            GameSystem game = new GameSystem(_configPath, id);
+            games.Add(id, game); // 添加到games中，以便管理
             Task.Run(async () => {
+                // 启动游戏 
                 idAvailability[id] = false;
                 await game.Start();
+                // 等待游戏结束后，移除游戏并释放id
                 games.Remove(id);
                 idAvailability[id] = true;
             });
@@ -59,6 +63,7 @@ namespace SnakeGame.Class
             return id;
         }
 
+        // 处理从网络接口收到的指令
         public void ProcessMessage(string message)
         {
             string[] data = message.Split(' ');
@@ -99,11 +104,8 @@ namespace SnakeGame.Class
                             network.Send(id + " over");
                         }
                         break;
-
                 }
             }
         }
     }
-
-
 }

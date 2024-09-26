@@ -2,6 +2,7 @@
 using System;
 using System.Drawing;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SnakeGame.Gui
@@ -15,7 +16,7 @@ namespace SnakeGame.Gui
 
         private Bitmap i;
 
-        private Thread showThread;
+        private Task showThread;
         private bool isRunning = false;
         private int interval;
         public ShowWindow(DataInterface data, int interval, int length)
@@ -78,10 +79,9 @@ namespace SnakeGame.Gui
 
         private void ShowWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
-            isRunning = false;
-            if (showThread != null && showThread.IsAlive)
+            if (showThread != null)
             {
-                showThread.Join();
+                Stop();
             }
         }
 
@@ -112,14 +112,18 @@ namespace SnakeGame.Gui
         public void Start()
         {
             isRunning = true;
-            showThread = new Thread(() => {
+            showThread = Task.Run(() => {
                 while (isRunning)
                 {
                     Showwindow();
-                    Thread.Sleep(interval);
+                    Task.Delay(interval).Wait();
                 }
             });
-            showThread.Start();
+        }
+
+        public void Stop()
+        {
+            isRunning = false;
         }
     }
 }

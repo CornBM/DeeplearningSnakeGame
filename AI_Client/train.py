@@ -17,6 +17,9 @@ def score2loss(score):
 def train():
     net.train()
     dataloader.startNewGame()
+    dataloader.startNewGame()
+    dataloader.startNewGame()
+    dataloader.startNewGame()
     data = dataloader.queue.get()
     id = data.id
     direction = data.direction
@@ -38,7 +41,6 @@ def train():
         print(f"loss: {loss:.4f}")
         loss.backward()
         optimizer.step()
-        time.sleep(0.1)
 
     print("Finished Training")
     torch.save(net.state_dict(), "snake7.pth")
@@ -67,7 +69,7 @@ if __name__ == "__main__":
     net = SnakeNet(4)
 
     # 加载参数
-    net.load_state_dict(torch.load("snake6.pth"))
+    net.load_state_dict(torch.load("snake7.pth"))
 
     net.to(device)
     dataloader = Dataloader('127.0.0.1', 5555)

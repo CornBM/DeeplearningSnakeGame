@@ -85,7 +85,7 @@ namespace SnakeGame.Class
                     }
                 }));
             }
-
+            // 当任意一个功能模块结束时，停止所有功能模块
             await Task.WhenAny(tasks);
             Stop();
         }
